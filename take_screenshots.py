@@ -52,11 +52,11 @@ def run(page, errors: list):
     assert not begin_btn.is_disabled(), "Begin button should be enabled"
     print("    ✓  Welcome: title shows Nandini, Begin button enabled")
 
-    # 2 ── Click Begin → Q1 (Begin now creates a new session async before advancing)
+    # 2 ── Click Begin → Q1 (direction: job vs business)
     begin_btn.click()
     wait_for_screen(page, "screen-question", timeout=20000)
     time.sleep(0.5)
-    snap(page, "02_question_01", "Question 1 — energy (single-select)")
+    snap(page, "02_question_01", "Question 1 — direction (job or business)")
 
     q_text = page.text_content(".question-text")
     assert q_text and len(q_text) > 5, "Question text is empty"
@@ -64,32 +64,16 @@ def run(page, errors: list):
     assert len(options) >= 2, f"Expected at least 2 options, got {len(options)}"
     print(f"    ✓  Q1 loaded: '{q_text[:50]}...' | {len(options)} options")
 
-    # 3 ── Answer Q1 (single) → observe auto-advance
-    options[0].click()
+    # 3 ── Answer Q1 (job path) → auto-advance to sector question
+    options[0].click()   # "Get a job"
     time.sleep(0.8)
-    snap(page, "03_question_02", "Question 2 after auto-advance")
+    snap(page, "03_question_02", "Question 2 — sector (private / government)")
 
-    # 4 ── Answer Q2 (single)
-    options2 = page.query_selector_all(".option")
-    options2[1].click()
+    # 4 ── Answer Q2 sector (single-select)
+    options2 = [o for o in page.query_selector_all(".option") if o.is_visible()]
+    options2[0].click()
     time.sleep(0.6)
-    snap(page, "04_question_03", "Question 3 — multi-select with Continue button")
-
-    # 5 ── Q3 is multi-select — pick two options then click Continue
-    options3 = page.query_selector_all(".option")
-    options3[0].click()
-    time.sleep(0.2)
-    options3[2].click()
-    time.sleep(0.4)
-    snap(page, "05_question_03_selected", "Question 3 — two options selected")
-
-    continue_btn = page.query_selector("#continueBtn")
-    if continue_btn and continue_btn.is_visible():
-        continue_btn.click()
-    else:
-        # If it's single, just click first option
-        options3[0].click()
-    time.sleep(0.6)
+    snap(page, "04_question_03", "Question 3 after sector answer")
 
     # 6 ── Answer remaining questions quickly (loop until quiz finishes)
     snap_count = {6: "single", 8: "single", 10: "single", 7: "multi", 9: "multi"}

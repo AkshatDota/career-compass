@@ -36,7 +36,31 @@
   // Each option has tags that contribute weight to local scores,
   // and a human-readable label sent to the backend for the AI prompt.
   // ----------------------------------------------------------
-  const QUESTIONS = [
+  // Question bank — direction → job path OR business path
+  // ----------------------------------------------------------
+  const QUESTION_DIRECTION = {
+    id: 'direction',
+    text: 'What is your primary goal after BCA?',
+    hint: 'This shapes everything that follows.',
+    type: 'single',
+    options: [
+      { id: 'job',      label: 'Get a job — I want stable employment and a career',  tags: {} },
+      { id: 'business', label: 'Start a business — I want to be my own boss',        tags: {} },
+    ],
+  };
+
+  const QUESTIONS_JOB = [
+    {
+      id: 'sector',
+      text: 'Which sector appeals to you more?',
+      hint: 'This focuses your career matches.',
+      type: 'single',
+      options: [
+        { id: 'private',    label: 'Private sector — faster growth, higher pay',               tags: { startup: 1, tech: 1 } },
+        { id: 'government', label: 'Government / PSU — job security, pension, stability',       tags: { stability: 3, finance: 1 } },
+        { id: 'open',       label: 'Open to both — show me the best option either way',         tags: {} },
+      ],
+    },
     {
       id: 'energy',
       text: 'What kind of work energizes you most?',
@@ -224,6 +248,92 @@
     },
   ];
 
+  const QUESTIONS_BUSINESS = [
+    {
+      id: 'biz_type',
+      text: 'What kind of business excites you most?',
+      hint: 'Pick the one that genuinely gets you going.',
+      type: 'single',
+      options: [
+        { id: 'tech',      label: 'Tech / Software — app, SaaS, or digital product',           tags: { tech: 3, startup: 2 } },
+        { id: 'service',   label: 'Service business — agency, freelancing, or consulting',      tags: { people: 2, craft: 2 } },
+        { id: 'retail',    label: 'Retail / E-commerce — sell physical or online products',     tags: { ops: 2, finance: 1 } },
+        { id: 'food',      label: 'Food & Beverage — restaurant, cloud kitchen, or catering',   tags: { ops: 2, people: 1 } },
+        { id: 'education', label: 'Education / Coaching — teach, tutor, or upskill others',    tags: { people: 3, comms: 2 } },
+        { id: 'creative',  label: 'Creative / Content — design, media, or entertainment',       tags: { creative: 3, comms: 2 } },
+      ],
+    },
+    {
+      id: 'biz_investment',
+      text: 'How much can you realistically invest to get started?',
+      hint: 'Be honest — this shapes what is actually possible for you.',
+      type: 'single',
+      options: [
+        { id: 'bootstrap', label: 'Almost nothing — under ₹10,000 (pure bootstrap)',           tags: { stability: 1 } },
+        { id: 'small',     label: '₹10,000 – ₹1 Lakh — small savings or family support',      tags: {} },
+        { id: 'medium',    label: '₹1 Lakh – ₹10 Lakh — small loan or pooled savings',        tags: { risk: 1 } },
+        { id: 'large',     label: '₹10 Lakh+ — solid backing or investors in mind',            tags: { risk: 2, startup: 1 } },
+      ],
+    },
+    {
+      id: 'biz_location',
+      text: 'Where do you plan to operate or expand?',
+      hint: 'Your city and reach shapes which ideas are realistic right now.',
+      type: 'single',
+      options: [
+        { id: 'metro',      label: 'Metro city (Delhi / Mumbai / Bangalore / Hyderabad / Chennai)', tags: { startup: 1 } },
+        { id: 'tier2',      label: 'Mid-size city (Pune / Jaipur / Indore / Lucknow etc.)',         tags: {} },
+        { id: 'small_town', label: 'Small town or rural area',                                       tags: { stability: 1 } },
+        { id: 'online',     label: 'Fully online — location does not matter',                        tags: { tech: 1, startup: 1 } },
+      ],
+    },
+    {
+      id: 'biz_idea',
+      text: 'Do you already have a specific business idea?',
+      type: 'single',
+      options: [
+        { id: 'clear', label: 'Yes — a clear idea, I just need direction and a plan', tags: {} },
+        { id: 'rough', label: 'Somewhat — a rough concept but nothing solid yet',     tags: {} },
+        { id: 'none',  label: 'Not yet — I need help figuring out the right path',   tags: {} },
+      ],
+    },
+    {
+      id: 'biz_customer',
+      text: 'Who would your primary customers be?',
+      type: 'single',
+      options: [
+        { id: 'local',    label: 'Regular people in my city or nearby (B2C, local)',  tags: { people: 2 } },
+        { id: 'online',   label: 'Anyone across India via the internet (B2C, online)',tags: { tech: 1, startup: 1 } },
+        { id: 'business', label: 'Other businesses or professionals (B2B)',            tags: { finance: 1, leadership: 1 } },
+        { id: 'unsure',   label: 'Not sure yet',                                      tags: {} },
+      ],
+    },
+    {
+      id: 'biz_strength',
+      text: 'What is your biggest personal strength?',
+      hint: 'The best businesses are built on real strengths, not wishful thinking.',
+      type: 'single',
+      options: [
+        { id: 'tech_skill', label: 'Technical skills — coding, design, or building things',    tags: { tech: 2, craft: 2 } },
+        { id: 'sales',      label: 'Sales & persuasion — I can convince and close people',     tags: { people: 2, leadership: 1 } },
+        { id: 'network',    label: 'Connections — I know a lot of the right people',           tags: { people: 1, leadership: 1 } },
+        { id: 'creative',   label: 'Creativity — I constantly come up with fresh ideas',       tags: { creative: 3 } },
+        { id: 'ops',        label: 'Discipline & operations — I am organised and consistent',  tags: { ops: 2, stability: 1 } },
+      ],
+    },
+    {
+      id: 'biz_timeline',
+      text: 'When are you aiming to launch?',
+      type: 'single',
+      options: [
+        { id: 'asap',  label: 'As soon as possible — within 3 months',          tags: { risk: 1 } },
+        { id: 'soon',  label: 'Within 6 months — once I feel prepared',         tags: {} },
+        { id: 'year',  label: 'In about a year — I want to plan it properly',   tags: { stability: 1 } },
+        { id: 'later', label: 'No rush yet — I am still exploring options',     tags: { stability: 1 } },
+      ],
+    },
+  ];
+
   // ----------------------------------------------------------
   // Real API layer
   // ----------------------------------------------------------
@@ -282,55 +392,65 @@
   // ----------------------------------------------------------
   // Normalise AI result → consistent shape for renderResults()
   // ----------------------------------------------------------
+  function _parseRoadmap(raw) {
+    if (!raw) return [];
+    return raw.map(step => {
+      if (typeof step !== 'string') return { title: step.title || step, desc: step.desc || '' };
+      const body = step.replace(/^Step\s*\d+[:.]\s*/i, '');
+      const sep  = body.search(/\s[—–-]\s/);
+      return sep > -1
+        ? { title: body.slice(0, sep).trim(), desc: body.slice(sep + 3).trim() }
+        : { title: body, desc: '' };
+    });
+  }
+
   function normalizeResults(data) {
+    const summary = Array.isArray(data.summary)
+      ? data.summary : (data.summary ? [data.summary] : []);
+
+    // Business path
+    if (data.businesses) {
+      const businesses = (data.businesses || []).map(b => ({
+        title:    b.title || 'Business Idea',
+        match:    b.match_score || null,
+        tagline:  b.tagline || '',
+        fit:      b.why_it_fits || '',
+        investment: [
+          { stage: 'Minimum',    label: 'To get started',   range: b.investment?.minimum    || '—' },
+          { stage: 'Comfortable',label: 'Proper launch',    range: b.investment?.comfortable || '—' },
+          { stage: 'To scale',   label: 'Growth phase',     range: b.investment?.to_scale    || '—' },
+        ],
+        revenue: [
+          { stage: 'Year 1',  label: 'First year',   range: b.revenue_potential?.year1    || '—' },
+          { stage: 'Year 3',  label: 'Established',  range: b.revenue_potential?.year3    || '—' },
+          { stage: 'At scale',label: 'Growth phase', range: b.revenue_potential?.at_scale || '—' },
+        ],
+        skills:    b.skills_to_build || [],
+        roadmap:   _parseRoadmap(b.roadmap),
+        resources: b.resources || [],
+      }));
+      return { type: 'business', generatedOn: todayLabel(), businesses, summary };
+    }
+
+    // Job path
     const careers = (data.careers || []).map(c => {
-      // salary: API returns { fresher, mid_level, senior } object
-      let salary;
-      if (Array.isArray(c.salary)) {
-        salary = c.salary; // already in render format
-      } else {
-        salary = [
-          { stage: 'Fresher',   years: '0–1 yr',  range: c.salary?.fresher   || '—' },
-          { stage: 'Mid-level', years: '3–5 yrs', range: c.salary?.mid_level || '—' },
-          { stage: 'Senior',    years: '10+ yrs', range: c.salary?.senior    || '—' },
-        ];
-      }
-
-      // roadmap: API returns ["Step 1: title — desc", ...] strings
-      let roadmap;
-      if (c.roadmap && typeof c.roadmap[0] === 'string') {
-        roadmap = c.roadmap.map(step => {
-          // strip leading "Step N: " then split on first em-dash or colon
-          const body = step.replace(/^Step\s*\d+[:.]\s*/i, '');
-          const sep = body.search(/\s[—–-]\s/);
-          if (sep > -1) {
-            return { title: body.slice(0, sep).trim(), desc: body.slice(sep + 3).trim() };
-          }
-          // fallback: whole string as title
-          return { title: body, desc: '' };
-        });
-      } else {
-        roadmap = c.roadmap || [];
-      }
-
+      const salary = Array.isArray(c.salary) ? c.salary : [
+        { stage: 'Fresher',   years: '0–1 yr',  range: c.salary?.fresher   || '—' },
+        { stage: 'Mid-level', years: '3–5 yrs', range: c.salary?.mid_level || '—' },
+        { stage: 'Senior',    years: '10+ yrs', range: c.salary?.senior    || '—' },
+      ];
       return {
-        title:      c.title,
-        tagline:    c.tagline,
-        fit:        c.why_it_fits || c.fit || '',
+        title:     c.title,
+        tagline:   c.tagline,
+        fit:       c.why_it_fits || c.fit || '',
         salary,
-        skills:     c.skills_to_build || c.skills || [],
-        roadmap,
-        companies:  c.top_companies  || [],
-        match:      c.match_score    || c.match || null,
+        skills:    c.skills_to_build || c.skills || [],
+        roadmap:   _parseRoadmap(c.roadmap),
+        companies: c.top_companies || [],
+        match:     c.match_score   || c.match || null,
       };
     });
-
-    // summary: API returns a single string; render expects array of bullets
-    const summary = Array.isArray(data.summary)
-      ? data.summary
-      : (data.summary ? [data.summary] : []);
-
-    return { generatedOn: todayLabel(), careers, summary };
+    return { type: 'job', generatedOn: todayLabel(), careers, summary };
   }
 
   // ----------------------------------------------------------
@@ -340,12 +460,21 @@
     sessionId:        null,
     name:             'Nandini',
     gender:           'female',
-    history:          [],   // question objects visited
-    answers:          {},   // qid → selected option id(s)
+    path:             null,   // 'job' | 'business' — set after direction Q
+    history:          [],
+    answers:          {},
     currentQuestion:  null,
     currentSelection: [],
     results:          null,
   };
+
+  function activeQuestions() {
+    return state.path === 'business' ? QUESTIONS_BUSINESS : QUESTIONS_JOB;
+  }
+
+  function totalQuestions() {
+    return 1 + activeQuestions().length; // 1 for the direction Q
+  }
 
   // ----------------------------------------------------------
   // Screen routing
@@ -403,9 +532,10 @@
     updateContinueButton();
 
     const idx = state.history.length;
+    const total = state.path ? totalQuestions() : '?';
     $('#qNum').textContent = idx + 1;
-    $('#qTotal').textContent = QUESTIONS.length;
-    const pct = Math.min(100, ((idx + 0.5) / QUESTIONS.length) * 100);
+    $('#qTotal').textContent = total;
+    const pct = state.path ? Math.min(100, ((idx + 0.5) / totalQuestions()) * 100) : 5;
     $('#progressFill').style.width = pct + '%';
     $('#backBtn').disabled = state.history.length <= 1;
   }
@@ -482,12 +612,21 @@
       return;
     }
 
-    // Advance to next question or results
-    const nextIdx = QUESTIONS.findIndex(x => x.id === q.id) + 1;
-    if (nextIdx >= QUESTIONS.length) {
+    // Direction Q → set path and start the right question list
+    if (q.id === 'direction') {
+      state.path = answer; // 'job' | 'business'
+      localStorage.setItem('cc_path', answer);
+      renderQuestion(activeQuestions()[0]);
+      return;
+    }
+
+    // Advance within the active question list
+    const list = activeQuestions();
+    const nextIdx = list.findIndex(x => x.id === q.id) + 1;
+    if (nextIdx >= list.length) {
       await fetchAndShowResults();
     } else {
-      renderQuestion(QUESTIONS[nextIdx]);
+      renderQuestion(list[nextIdx]);
     }
   }
 
@@ -502,18 +641,26 @@
   // ----------------------------------------------------------
   // Loading screen
   // ----------------------------------------------------------
-  const LOADING_MESSAGES = [
-    "Analysing Nandini's answers…",
-    'Mapping career paths…',
-    'Calculating salary ranges…',
-    "Building Nandini's roadmap…",
-  ];
+  const LOADING_MESSAGES = {
+    job: [
+      "Analysing Nandini's answers…",
+      'Mapping career paths…',
+      'Calculating salary ranges…',
+      "Building Nandini's roadmap…",
+    ],
+    business: [
+      "Analysing Nandini's answers…",
+      'Exploring business opportunities…',
+      'Calculating investment & revenue…',
+      "Building Nandini's business roadmap…",
+    ],
+  };
   let loadingTimer = null;
   let loadingSlowTimer = null;
 
   function startLoading() {
     showScreen('loading');
-    const msgs = LOADING_MESSAGES;
+    const msgs = LOADING_MESSAGES[state.path] || LOADING_MESSAGES.job;
     const titleEl = $('#loadingTitle');
     const subEl = $('#loadingSub');
     let i = 0;
@@ -563,97 +710,139 @@
   // ----------------------------------------------------------
   // Results rendering
   // ----------------------------------------------------------
+  function _roadmapHtml(roadmap) {
+    return `<ol class="roadmap">${roadmap.map(step => `
+      <li><div>
+        <span class="step-title">${step.title}</span>
+        ${step.desc ? `<span class="step-desc">${step.desc}</span>` : ''}
+      </div></li>`).join('')}</ol>`;
+  }
+
   function renderResults(data) {
+    $('#headerMeta').textContent = data.generatedOn;
+    $('#resultsFootnote').textContent = "Career Compass · Nandini's Report";
+    if (data.type === 'business') {
+      _renderBusinessResults(data);
+    } else {
+      _renderCareerResults(data);
+    }
+  }
+
+  function _renderCareerResults(data) {
     const wrap = $('#resultsWrap');
-
-    const careerCards = data.careers.map((c, i) => {
-      const companiesHtml = c.companies && c.companies.length
-        ? `<div class="career-section">
-             <p class="career-section-h">Top companies hiring</p>
-             <div class="skills">
-               ${c.companies.map(co => `<span class="skill-tag">${co}</span>`).join('')}
-             </div>
-           </div>`
-        : '';
-
-      return `
-        <article class="career-card">
-          <div class="career-rank">Match ${String(i + 1).padStart(2, '0')}</div>
-          ${c.match ? `<div class="career-match">${c.match}% match</div>` : ''}
-          <h3 class="career-title">${c.title}</h3>
-          <p class="career-tagline">${c.tagline}</p>
-
-          <div class="career-section">
-            <p class="career-section-h">Why this fits you</p>
-            <p class="career-fit">${c.fit}</p>
-          </div>
-
-          <div class="career-section">
-            <p class="career-section-h">Salary expectations · India</p>
-            <table class="salary-table">
-              ${c.salary.map(s => `
-                <tr>
-                  <td>
-                    <span class="role-stage">${s.stage}</span>
-                    <span class="years">${s.years}</span>
-                  </td>
-                  <td>${s.range}</td>
-                </tr>
-              `).join('')}
-            </table>
-          </div>
-
-          <div class="career-section">
-            <p class="career-section-h">Skills to build</p>
-            <div class="skills">
-              ${c.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
-            </div>
-          </div>
-
-          <div class="career-section">
-            <p class="career-section-h">Your roadmap</p>
-            <ol class="roadmap">
-              ${c.roadmap.map(step => `
-                <li>
-                  <div>
-                    <span class="step-title">${step.title}</span>
-                    ${step.desc ? `<span class="step-desc">${step.desc}</span>` : ''}
-                  </div>
-                </li>
-              `).join('')}
-            </ol>
-          </div>
-
-          ${companiesHtml}
-        </article>
-      `;
-    }).join('');
+    const cards = data.careers.map((c, i) => `
+      <article class="career-card">
+        <div class="career-rank">Match ${String(i + 1).padStart(2, '0')}</div>
+        ${c.match ? `<div class="career-match">${c.match}% match</div>` : ''}
+        <h3 class="career-title">${c.title}</h3>
+        <p class="career-tagline">${c.tagline}</p>
+        <div class="career-section">
+          <p class="career-section-h">Why this fits you</p>
+          <p class="career-fit">${c.fit}</p>
+        </div>
+        <div class="career-section">
+          <p class="career-section-h">Salary expectations · India</p>
+          <table class="salary-table">
+            ${c.salary.map(s => `<tr>
+              <td><span class="role-stage">${s.stage}</span><span class="years">${s.years}</span></td>
+              <td>${s.range}</td>
+            </tr>`).join('')}
+          </table>
+        </div>
+        <div class="career-section">
+          <p class="career-section-h">Skills to build</p>
+          <div class="skills">${c.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
+        </div>
+        <div class="career-section">
+          <p class="career-section-h">Your roadmap</p>
+          ${_roadmapHtml(c.roadmap)}
+        </div>
+        ${c.companies.length ? `
+        <div class="career-section">
+          <p class="career-section-h">Top companies hiring</p>
+          <div class="skills">${c.companies.map(co => `<span class="skill-tag">${co}</span>`).join('')}</div>
+        </div>` : ''}
+      </article>`).join('');
 
     wrap.innerHTML = `
       <header class="results-header">
         <div class="results-eyebrow">Nandini's Career Report</div>
         <h1 class="results-title">Nandini, here are your paths.</h1>
-        <p class="results-sub">Based on your answers, here are your strongest career matches —
-          each with real Indian salary data, active hiring companies, and a step-by-step roadmap.</p>
+        <p class="results-sub">Based on your answers — real Indian salary data, active hiring companies, and a step-by-step roadmap.</p>
         <div class="results-meta">
           <div><strong>${data.generatedOn}</strong>Report date</div>
           <div><strong>${data.careers.length} careers</strong>Top matches</div>
           <div><strong>${Object.keys(state.answers).length} answers</strong>Inputs analysed</div>
         </div>
       </header>
-
-      ${careerCards}
-
+      ${cards}
       <section class="next-section">
         <h3>What to do next</h3>
-        <ul>
-          ${data.summary.map(s => `<li>${s}</li>`).join('')}
-        </ul>
-      </section>
-    `;
+        <ul>${data.summary.map(s => `<li>${s}</li>`).join('')}</ul>
+      </section>`;
+  }
 
-    $('#headerMeta').textContent = data.generatedOn;
-    $('#resultsFootnote').textContent = "Career Compass · Nandini's Report";
+  function _renderBusinessResults(data) {
+    const wrap = $('#resultsWrap');
+    const cards = data.businesses.map((b, i) => `
+      <article class="career-card">
+        <div class="career-rank">Idea ${String(i + 1).padStart(2, '0')}</div>
+        ${b.match ? `<div class="career-match">${b.match}% match</div>` : ''}
+        <h3 class="career-title">${b.title}</h3>
+        <p class="career-tagline">${b.tagline}</p>
+        <div class="career-section">
+          <p class="career-section-h">Why this fits you</p>
+          <p class="career-fit">${b.fit}</p>
+        </div>
+        <div class="career-section">
+          <p class="career-section-h">Investment required · India</p>
+          <table class="salary-table">
+            ${b.investment.map(row => `<tr>
+              <td><span class="role-stage">${row.stage}</span><span class="years">${row.label}</span></td>
+              <td>${row.range}</td>
+            </tr>`).join('')}
+          </table>
+        </div>
+        <div class="career-section">
+          <p class="career-section-h">Revenue potential · India</p>
+          <table class="salary-table">
+            ${b.revenue.map(row => `<tr>
+              <td><span class="role-stage">${row.stage}</span><span class="years">${row.label}</span></td>
+              <td>${row.range}</td>
+            </tr>`).join('')}
+          </table>
+        </div>
+        <div class="career-section">
+          <p class="career-section-h">Skills to build</p>
+          <div class="skills">${b.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
+        </div>
+        <div class="career-section">
+          <p class="career-section-h">Your launch roadmap</p>
+          ${_roadmapHtml(b.roadmap)}
+        </div>
+        ${b.resources.length ? `
+        <div class="career-section">
+          <p class="career-section-h">Where to start in India</p>
+          <div class="skills">${b.resources.map(r => `<span class="skill-tag">${r}</span>`).join('')}</div>
+        </div>` : ''}
+      </article>`).join('');
+
+    wrap.innerHTML = `
+      <header class="results-header">
+        <div class="results-eyebrow">Nandini's Business Report</div>
+        <h1 class="results-title">Nandini, here are your ventures.</h1>
+        <p class="results-sub">Based on your answers — real Indian investment figures, revenue potential, and a step-by-step launch roadmap.</p>
+        <div class="results-meta">
+          <div><strong>${data.generatedOn}</strong>Report date</div>
+          <div><strong>${data.businesses.length} ideas</strong>Top matches</div>
+          <div><strong>${Object.keys(state.answers).length} answers</strong>Inputs analysed</div>
+        </div>
+      </header>
+      ${cards}
+      <section class="next-section">
+        <h3>What to do next</h3>
+        <ul>${data.summary.map(s => `<li>${s}</li>`).join('')}</ul>
+      </section>`;
   }
 
   // ----------------------------------------------------------
@@ -672,9 +861,11 @@
   async function restart() {
     state.history          = [];
     state.answers          = {};
+    state.path             = null;
     state.currentQuestion  = null;
     state.currentSelection = [];
     state.results          = null;
+    localStorage.removeItem('cc_path');
     $('#headerMeta').textContent = '';
     document.getElementById('resumeBtn')?.remove();
 
@@ -717,9 +908,9 @@
   // Boot
   // ----------------------------------------------------------
   async function boot() {
-    // Restore existing session from localStorage; only create a new one if none exists.
-    const storedSid = localStorage.getItem('cc_session_id');
+    const storedSid  = localStorage.getItem('cc_session_id');
     const hasResults = localStorage.getItem('cc_has_results');
+    state.path = localStorage.getItem('cc_path') || null;
 
     if (storedSid) {
       state.sessionId = storedSid;
@@ -765,7 +956,9 @@
         console.warn('Could not save name/gender:', e.message);
       }
 
-      renderQuestion(QUESTIONS[0]);
+      state.path = null;
+      localStorage.removeItem('cc_path');
+      renderQuestion(QUESTION_DIRECTION);
       showScreen('question');
     });
 

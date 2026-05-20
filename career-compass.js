@@ -692,18 +692,25 @@
   // ----------------------------------------------------------
   function downloadPDF() {
     const wrap = document.getElementById('resultsWrap');
-    if (window.html2pdf && wrap) {
-      html2pdf().set({
-        margin:      [12, 12, 12, 12],
-        filename:    'career-compass-report.pdf',
-        image:       { type: 'jpeg', quality: 0.96 },
-        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
-        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:   { mode: ['avoid-all', 'css', 'legacy'] },
-      }).from(wrap).save();
-    } else {
-      window.print();
-    }
+    if (!window.html2pdf || !wrap) { window.print(); return; }
+
+    // Clone into a detached node at body level so no ancestor CSS (.screen, overflow:hidden, etc.)
+    // can interfere with html2canvas capture.
+    const clone = wrap.cloneNode(true);
+    clone.style.cssText = [
+      'position:absolute', 'left:-9999px', 'top:0',
+      'width:794px', 'background:#ffffff', 'padding:24px',
+    ].join(';');
+    document.body.appendChild(clone);
+
+    html2pdf().set({
+      margin:      [12, 12, 12, 12],
+      filename:    "Nandini's Career Report.pdf",
+      image:       { type: 'jpeg', quality: 0.97 },
+      html2canvas: { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', windowWidth: 794 },
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:   { mode: ['avoid-all', 'css', 'legacy'] },
+    }).from(clone).save().finally(() => document.body.removeChild(clone));
   }
 
   // ----------------------------------------------------------

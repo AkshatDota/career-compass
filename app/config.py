@@ -7,7 +7,9 @@ AI_PROVIDER: str = os.getenv("AI_PROVIDER", "anthropic").lower()  # anthropic | 
 ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
 GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
 GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
-DB_PATH: str = os.getenv("DB_PATH", "career_compass.db")
+# Vercel's filesystem is read-only except /tmp; detect via the VERCEL env var it sets automatically
+_default_db = "/tmp/career_compass.db" if os.getenv("VERCEL") else "career_compass.db"
+DB_PATH: str = os.getenv("DB_PATH", _default_db)
 
 _REQUIRED_KEY = {
     "anthropic": ("ANTHROPIC_API_KEY", ANTHROPIC_API_KEY),
